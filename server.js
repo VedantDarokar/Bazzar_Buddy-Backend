@@ -10,13 +10,16 @@ import supplierRouter from "./Routes/supplierRoutes.js";
 import { authMiddleware } from "./middleware/auth.js";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
 // ✅ Load environment variables
 config({ path: ".env" });
 
 // ✅ Middleware
-app.use(cors());                // Allow cross-origin requests
+app.use(cors({
+  origin: 'http://localhost:3000', // Allow frontend dev server
+  credentials: true
+}));                // Allow cross-origin requests
 app.use(express.json());        // Parse JSON bodies
 
 // ✅ Routes

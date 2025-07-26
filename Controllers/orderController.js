@@ -1,5 +1,6 @@
 import { Order } from "../Models/Order.js";
 import { CartItem } from "../Models/CartItem.js";
+import { Product } from "../Models/Product.js";
 
 /**
  * Place an order
@@ -19,10 +20,21 @@ export const placeOrder = async (req, res) => {
       return res.status(400).json({ message: "Delivery date is required" });
     }
 
+    // For each item, look up the product and set supplierId
+    const itemsWithSupplier = await Promise.all(items.map(async (item) => {
+      const product = await Product.findOne({ name: item.productName });
+      if (!product) throw new Error(`Product not found: ${item.productName}`);
+      return {
+        ...item,
+        supplierId: product.supplierId,
+        supplierName: product.supplierName || item.supplierName || "",
+      };
+    }));
+
     // Create new order
     const order = new Order({
       userId,
-      items,
+      items: itemsWithSupplier,
       isGroupOrder: Boolean(isGroupOrder),
       deliveryDate: new Date(deliveryDate),
     });
@@ -39,7 +51,7 @@ export const placeOrder = async (req, res) => {
     });
   } catch (err) {
     console.error("placeOrder error:", err);
-    res.status(500).json({ message: "Failed to place order" });
+    res.status(500).json({ message: err.message || "Failed to place order" });
   }
 };
 

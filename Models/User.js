@@ -6,6 +6,8 @@ const userSchema = new mongoose.Schema({
   phone: { type: String },
   role: { type: String, enum: ["vendor", "supplier"], required: true },
   password: { type: String, required: true },
+  verified: { type: Boolean, default: false },
+  rating: { type: Number, default: 0 },
 });
 
 export const User = mongoose.model("User", userSchema);

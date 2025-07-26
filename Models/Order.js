@@ -6,6 +6,7 @@ const orderSchema = new mongoose.Schema({
     {
       productName: String,
       supplierName: String,
+      supplierId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
       price: Number,
       quantity: Number,
       unit: String
