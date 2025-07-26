@@ -1,10 +1,18 @@
 import { Order } from "../Models/Order.js";
 
-// Get all orders that contain this supplier’s products
+// Get all supplier orders or orders for logged-in supplier
 export const getSupplierOrders = async (req, res) => {
   try {
-    // If each order item has supplier info, filter accordingly
-    const orders = await Order.find({ "items.supplierId": req.user.id });
+    let orders;
+    
+    // If user is a supplier, get their orders
+    if (req.user && req.user.role === 'supplier') {
+      orders = await Order.find({ "items.supplierId": req.user.id });
+    } else {
+      // If no supplier context or user is not a supplier, get all supplier orders
+      orders = await Order.find({}).populate('items.supplierId', 'name');
+    }
+    
     res.json(orders);
   } catch (err) {
     console.error(err);

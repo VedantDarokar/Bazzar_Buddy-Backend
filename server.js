@@ -7,6 +7,8 @@ import authRoutes from "./Routes/authRoutes.js";
 import cartRouter from "./Routes/cartRouters.js";
 import orderRouter from "./Routes/orderRoutes.js";
 import supplierRouter from "./Routes/supplierRoutes.js";
+import productRouter from "./Routes/productRoutes.js";
+import supplierOrdersRouter from "./Routes/supplierOrders.js";
 import { authMiddleware } from "./middleware/auth.js";
 
 const app = express();
@@ -27,6 +29,8 @@ app.use("/api", authRoutes);    // public routes (register/login)
 app.use("/api/cart", authMiddleware, cartRouter);     // protected cart routes
 app.use("/api/orders", authMiddleware, orderRouter); // protected order routes
 app.use("/api/suppliers", supplierRouter);
+app.use("/api/products", productRouter);
+app.use("/api/supplierOrders", supplierOrdersRouter);
 
 // ✅ MongoDB Connection
 mongoose

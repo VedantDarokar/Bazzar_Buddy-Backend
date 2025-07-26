@@ -1,9 +1,18 @@
 import { Product } from "../Models/Product.js";
 
-// Get products for logged-in supplier
+// Get all products or products for logged-in supplier
 export const getSupplierProducts = async (req, res) => {
   try {
-    const products = await Product.find({ supplierId: req.user.id });
+    let products;
+    
+    // If user is a supplier, get their products
+    if (req.user && req.user.role === 'supplier') {
+      products = await Product.find({ supplierId: req.user.id });
+    } else {
+      // If no supplier context or user is not a supplier, get all products
+      products = await Product.find({}).populate('supplierId', 'name');
+    }
+    
     res.json(products);
   } catch (err) {
     console.error(err);
