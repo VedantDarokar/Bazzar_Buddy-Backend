@@ -22,8 +22,19 @@ export const placeOrder = async (req, res) => {
 
     // For each item, look up the product and set supplierId
     const itemsWithSupplier = await Promise.all(items.map(async (item) => {
-      const product = await Product.findOne({ name: item.productName });
+      let product;
+      if (item.productId) {
+        product = await Product.findById(item.productId);
+      } else {
+        product = await Product.findOne({ name: item.productName });
+        if (!product) {
+          console.warn(`Product not found by name: ${item.productName}`);
+        } else {
+          console.warn(`Order item missing productId, found by name: ${item.productName}`);
+        }
+      }
       if (!product) throw new Error(`Product not found: ${item.productName}`);
+      console.log(`Order item: ${item.productName}, supplierId: ${product.supplierId}`);
       return {
         ...item,
         supplierId: product.supplierId,
