@@ -68,3 +68,18 @@ export const deleteSupplierProduct = async (req, res) => {
     res.status(500).json({ message: "Failed to delete product" });
   }
 };
+
+
+// Search products by query
+export const searchProducts = async (req, res) => {
+  try {
+    const q = req.query.q || ""; // search query
+    const products = await Product.find({
+      name: { $regex: q, $options: "i" }, // case-insensitive search
+    });
+    res.json(products);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
