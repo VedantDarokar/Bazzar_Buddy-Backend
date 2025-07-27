@@ -17,17 +17,31 @@ const PORT = process.env.PORT || 4000;
 // ✅ Load environment variables
 config({ path: ".env" });
 
-// ✅ Middleware
+// ✅ Allowed origins for both dev + production
+const allowedOrigins = [
+  "http://localhost:3000",                                  // local dev
+  "https://platform-for-food-vendors.onrender.com",        // deployed frontend (update with your actual client domain)
+];
+
+// ✅ CORS config
 app.use(cors({
-  origin: 'http://localhost:3000', // Allow frontend dev server
-  credentials: true
-}));                // Allow cross-origin requests
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`❌ CORS blocked from origin: ${origin}`));
+    }
+  },
+  credentials: true,
+}));
+
+// ✅ Middleware
 app.use(express.json());        // Parse JSON bodies
 
 // ✅ Routes
 app.use("/api", authRoutes);    // public routes (register/login)
 app.use("/api/cart", authMiddleware, cartRouter);     // protected cart routes
-app.use("/api/orders", authMiddleware, orderRouter); // protected order routes
+app.use("/api/orders", authMiddleware, orderRouter);  // protected order routes
 app.use("/api/suppliers", supplierRouter);
 app.use("/api/products", productRouter);
 app.use("/api/supplierOrders", supplierOrdersRouter);
