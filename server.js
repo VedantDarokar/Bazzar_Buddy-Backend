@@ -10,6 +10,8 @@ import authRoutes from "./Routes/authRoutes.js";
 import cartRouter from "./Routes/cartRouters.js";
 import orderRouter from "./Routes/orderRoutes.js";
 import supplierRouter from "./Routes/supplierRoutes.js";
+import productRouter from "./Routes/productRoutes.js";
+import supplierOrdersRouter from "./Routes/supplierOrders.js";
 import { authMiddleware } from "./middleware/auth.js";
 
 const app = express();
@@ -30,7 +32,37 @@ app.use(express.json());
 app.use("/api", authRoutes);
 app.use("/api/cart", authMiddleware, cartRouter);
 app.use("/api/orders", authMiddleware, orderRouter);
+// ✅ Load environment variables
+config({ path: ".env" });
+
+// ✅ Allowed origins for both dev + production
+const allowedOrigins = [
+  "http://localhost:3000",                                  // local dev
+  "https://platform-for-food-vendors.onrender.com",        // deployed frontend (update with your actual client domain)
+];
+
+// ✅ CORS config
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`❌ CORS blocked from origin: ${origin}`));
+    }
+  },
+  credentials: true,
+}));
+
+// ✅ Middleware
+app.use(express.json());        // Parse JSON bodies
+
+// ✅ Routes
+app.use("/api", authRoutes);    // public routes (register/login)
+app.use("/api/cart", authMiddleware, cartRouter);     // protected cart routes
+app.use("/api/orders", authMiddleware, orderRouter);  // protected order routes
 app.use("/api/suppliers", supplierRouter);
+app.use("/api/products", productRouter);
+app.use("/api/supplierOrders", supplierOrdersRouter);
 
 // MongoDB Connection
 mongoose

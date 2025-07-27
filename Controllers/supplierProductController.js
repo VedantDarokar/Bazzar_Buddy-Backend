@@ -1,9 +1,18 @@
 import { Product } from "../Models/Product.js";
 
-// Get products for logged-in supplier
+// Get all products or products for logged-in supplier
 export const getSupplierProducts = async (req, res) => {
   try {
-    const products = await Product.find({ supplierId: req.user.id });
+    let products;
+    
+    // If user is a supplier, get their products
+    if (req.user && req.user.role === 'supplier') {
+      products = await Product.find({ supplierId: req.user.id });
+    } else {
+      // If no supplier context or user is not a supplier, get all products
+      products = await Product.find({}).populate('supplierId', 'name');
+    }
+    
     res.json(products);
   } catch (err) {
     console.error(err);
@@ -57,5 +66,20 @@ export const deleteSupplierProduct = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Failed to delete product" });
+  }
+};
+
+
+// Search products by query
+export const searchProducts = async (req, res) => {
+  try {
+    const q = req.query.q || ""; // search query
+    const products = await Product.find({
+      name: { $regex: q, $options: "i" }, // case-insensitive search
+    });
+    res.json(products);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
   }
 };
